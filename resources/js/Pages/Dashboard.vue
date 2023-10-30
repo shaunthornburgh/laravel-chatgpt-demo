@@ -8,25 +8,32 @@ import TextInput from "@/Components/TextInput.vue";
 
 const messages = ref([]);
 const loading = ref(false);
-
 const page = usePage();
-
 const form = useForm({
     userMessage: '',
 })
+const count = ref(1);
 
 const store = async () => {
     loading.value = true;
-    messages.value.push({content: form.userMessage, sender: page.props.auth.user.name });
-    try {
-        const response = await axios.post('/chat', {
-            'userMessage': form.userMessage
-        })
-        messages.value.push({content: response.data.message, sender: 'ChatGPT'});
+    messages.value.push({
+        content: form.userMessage,
+        sender: page.props.auth.user.name
+    });
+
+    const source = new EventSource(`/chat?userMessage=${form.userMessage}`);
+    const message = {content: '', sender: 'ChatGPT'}
+    messages.value.push(message);
+    source.addEventListener("update", function (event) {
+        if (event.data === "<END_STREAM>") {
+            count.value += 2;
+            source.close();
+            return;
+        }
+        console.log(count.value)
+        messages.value[count.value].content += event.data
         form.userMessage = '';
-    } catch (error) {
-        console.log(error)
-    }
+    });
     loading.value = false;
 }
 </script>

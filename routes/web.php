@@ -20,7 +20,11 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::post('chat', ChatGPTController::class)
+//Route::post('chat', ChatGPTController::class)
+//    ->name('chat.store')
+//    ->middleware(['auth', 'verified']);
+
+Route::get('chat', ChatGPTController::class)
     ->name('chat.store')
     ->middleware(['auth', 'verified']);
 
